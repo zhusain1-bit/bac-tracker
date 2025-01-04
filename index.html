@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC Tracker</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        /* Header Styles */
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 24px;
+            padding: 0 16px;
+        }
+
+        /* Drink Button Grid */
+        .drink-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .drink-button {
+            padding: 16px 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            min-height: 80px;
+            font-size: 14px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .drink-button span {
+            margin-top: 8px;
+        }
+
+        .beer-button {
+            background-color: #fef3c7;
+        }
+
+        .beer-button:hover, .beer-button:active {
+            background-color: #fde68a;
+        }
+
+        .quarter-button {
+            background-color: #fef9c3;
+        }
+
+        .quarter-button:hover, .quarter-button:active {
+            background-color: #fef08a;
+        }
+
+        .shot-button {
+            background-color: #f3e8ff;
+        }
+
+        .shot-button:hover, .shot-button:active {
+            background-color: #e9d5ff;
+        }
+
+        /* Stats Panel */
+        .stats {
+            background-color: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .bac-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        /* BAC Meter */
+        .bac-meter {
+            background: #e5e7eb;
+            border-radius: 12px;
+            height: 24px;
+            margin: 12px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .bac-meter-fill {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .bac-status {
+            text-align: center;
+            font-weight: bold;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .status-safe {
+            color: #22c55e;
+        }
+
+        .status-caution {
+            color: #eab308;
+        }
+
+        .status-danger {
+            color: #ef4444;
+        }
+
+        .time-display {
+            color: #4b5563;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Projections */
+        .projections {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4b5563;
+            margin-top: 12px;
+        }
+
+        /* Drink History */
+        .drink-history {
+            margin-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 16px;
+        }
+
+        .drink-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+
+        .drink-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover, .delete-btn:active {
+            background: #fecaca;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 24px;
+            padding: 0 16px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 380px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .drink-buttons {
+                gap: 8px;
+            }
+
+            .drink-button {
+                padding: 12px 4px;
+                font-size: 13px;
+            }
+
+            .bac-display {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BAC Tracker</h1>
+        
+        <div class="drink-buttons">
+            <button class="drink-button beer-button" onclick="addDrink('beer')">
+                <span style="font-size: 24px;">🍺</span>
+                <span>Full Beer</span>
+            </button>
+            <button class="drink-button quarter-button" onclick="addDrink('quarter')">
+                <span style="font-size: 24px;">🥤</span>
+                <span>1/4 Beer</span>
+            </button>
+            <button class="drink-button shot-button" onclick="addDrink('shot')">
+                <span style="font-size: 24px;">🥃</span>
+                <span>Shot</span>
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="bac-display">BAC: <span id="currentBAC">0.000</span></div>
+            
+            <div class="bac-meter">
+                <div id="bacMeterFill" class="bac-meter-fill"></div>
+            </div>
+            <div id="bacStatus" class="bac-status"></div>
+            
+            <div class="time-display">
+                Time until sober: <span id="timeToSober">0.0</span> hours
+            </div>
+            
+            <div class="projections">
+                <strong>Next drink projection:</strong><br>
+                🍺 Beer: <span id="nextBeer">0.000</span><br>
+                🥤 1/4 Beer: <span id="nextQuarter">0.000</span><br>
+                🥃 Shot: <span id="nextShot">0.000</span>
+            </div>
+        </div>
+
+        <div id="drinkHistory" class="drink-history">
+            <div id="historyEntries"></div>
+        </div>
+
+        <div class="disclaimer">
+            Note: BAC calculations are estimates. Never drive or operate machinery after drinking.
+        </div>
+    </div>
+
+    <script>
+        // Constants for BAC calculation
+        const WEIGHT = 145; // lbs
+        const GENDER_CONSTANT = 0.68; // Male
+        const METABOLISM_RATE = 0.015; // Average alcohol elimination rate per hour
+        const DRINK_ALCOHOL = {
+            beer: 0.54, // oz of alcohol in one beer (12 oz @ 4.5%)
+            quarter: 0.135, // quarter of a beer
+            shot: 0.5 // oz of alcohol in one shot (1.5 oz @ 40%)
+        };
+
+        let drinks = [];
+
+        function addDrink(type) {
+            drinks.push({
+                type: type,
+                time: new Date()
+            });
+            updateBAC();
+            updateHistory();
+            localStorage.setItem('drinks', JSON.stringify(drinks));
+        }
+
+        function calculateBAC() {
+            const now = new Date();
+            let totalBAC = 0;
+
+            drinks.forEach(drink => {
+                const hoursElapsed = (now - new Date(drink.time)) / (1000 * 60 * 60);
+                const alcoholOz = DRINK_ALCOHOL[drink.type];
+                const initialBAC = (alcoholOz * 5.14) / (WEIGHT * GENDER_CONSTANT);
+                const remainingBAC = Math.max(0, initialBAC - (METABOLISM_RATE * hoursElapsed));
+                totalBAC += remainingBAC;
+            });
+
+            const hoursToSober = Math.max(0, totalBAC / METABOLISM_RATE);
+
+            return {
+                currentBAC: totalBAC,
+                hoursToSober: hoursToSober,
+                nextDrinkBAC: {
+                    beer: totalBAC + (DRINK_ALCOHOL.beer * 5.14) / (WEIGHT * GENDER_CONSTANT),
+                    quarter: totalBAC + (DRINK_ALCOHOL.quarter * 5.14) / (WEIGHT * GENDER_CONSTANT),
+                    shot: totalBAC + (DRINK_ALCOHOL.shot * 5.14) / (WEIGHT * GENDER_CONSTANT)
+                }
+            };
+        }
+
+        function updateBACMeter(bac) {
+            const meterFill = document.getElementById('bacMeterFill');
+            const statusText = document.getElementById('bacStatus');
+            
+            const percentage = Math.min((bac / 0.25) * 100, 100);
+            meterFill.style.width = `${percentage}%`;
+
+            let color, status;
+            if (bac < 0.04) {
+                color = '#22c55e';
+                status = 'Safe Zone';
+                statusText.className = 'bac-status status-safe';
+            } else if (bac < 0.08) {
+                color = '#eab308';
+                status = 'Caution Zone';
+                statusText.className = 'bac-status status-caution';
+            } else {
+                color = '#ef4444';
+                status = '⚠️ Danger Zone - Stop Drinking';
+                statusText.className = 'bac-status status-danger';
+            }
+            
+            meterFill.style.backgroundColor = color;
+            statusText.textContent = status;
+        }
+
+        function deleteDrink(index) {
+            drinks.splice(index, 1);
+            updateBAC();
+            updateHistory();
+            localStorage.setItem('drinks', JSON.stringify(drinks));
+        }
+
+        function updateHistory() {
+            const historyDiv = document.getElementById('historyEntries');
+            historyDiv.innerHTML = drinks.map((drink, index) => `
+                <div class="drink-entry">
+                    <div class="drink-info">
+                        <span>${drink.type}</span>
+                        <span style="color: #6b7280">
+                            ${new Date(drink.time).toLocaleTimeString()}
+                        </span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteDrink(${index})">
+                        Remove
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateBAC() {
+            const stats = calculateBAC();
+            
+            document.getElementById('currentBAC').textContent = stats.currentBAC.toFixed(3);
+            document.getElementById('timeToSober').textContent = (Math.round(stats.hoursToSober * 10) / 10).toFixed(1);
+            document.getElementById('nextBeer').textContent = stats.nextDrinkBAC.beer.toFixed(3);
+            document.getElementById('nextQuarter').textContent = stats.nextDrinkBAC.quarter.toFixed(3);
+            document.getElementById('nextShot').textContent = stats.nextDrinkBAC.shot.toFixed(3);
+            
+            updateBACMeter(stats.currentBAC);
+        }
+
+        // Load drinks from localStorage
+        const savedDrinks = localStorage.getItem('drinks');
+        if (savedDrinks) {
+            drinks = JSON.parse(savedDrinks);
+            updateBAC();
+            updateHistory();
+        }
+
+        // Update BAC every minute
+        setInterval(updateBAC, 60000);
+    </script>
+</body>
+</html>
